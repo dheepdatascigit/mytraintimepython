@@ -4,11 +4,19 @@ import json
 import os
 from datetime import datetime
 from dateutil import tz
+from azure.storage.blob import BlobClient
 
-
-# get environment variables for PTV API
+# GET Enviroment variables - Configuration settings
+## get environment variables for PTV API
 devid = os.environ.get("PTVAPI_DEVID")
 signature = os.environ.get("PTVAPI_SIG")
+
+## get eviroment variables for storage connection
+blobconnstr = os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
+### blbb settings
+blob_container_name = "traintimecontainer"
+blob_dstfile_name = "craigieburntraintime.json"
+
 
 # setup time zone to local => Melbourne
 from_zone = tz.gettz('UTC')
@@ -61,3 +69,12 @@ out = response.json()
 # write output json to local file
 jsontofile(out)
 showtraintimes(out)
+
+# blob connection
+
+blob = BlobClient.from_connection_string(conn_str=blobconnstr, container_name=blob_container_name, blob_name=blob_dstfile_name)
+
+with open("traintime.json", "rb") as data:
+    blob.upload_blob(data, overwrite=True)
+
+
