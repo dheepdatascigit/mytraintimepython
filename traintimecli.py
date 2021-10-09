@@ -32,6 +32,29 @@ def jsontofile(injson):
     with open('traintime.json', 'w') as outfile:
         json.dump(injson, outfile)
 
+def writefile_to_azblob(dstfile="filename.json", conn_str="connection str", container_name="blob_container_name", blob_name="blob_dstfile_name", overwrite=False):
+    
+    """ write a file to Azure Blob
+    """
+
+    blob = BlobClient.from_connection_string(conn_str=conn_str, container_name=container_name, blob_name=blob_name)
+
+    with open(dstfile, "rb") as data:
+        outetag = blob.upload_blob(data, overwrite=overwrite)
+
+    return outetag
+
+def writestring_to_azblob(outstr, conn_str="connection str", container_name="blob_container_name", blob_name="blob_dstfile_name", overwrite=False):
+    
+    """ write a file to Azure Blob
+    """
+
+    blob = BlobClient.from_connection_string(conn_str=conn_str, container_name=container_name, blob_name=blob_name)
+    outetag = blob.upload_blob(outstr, overwrite=overwrite)
+
+    return outetag
+
+
 def utctolocaltime(strtime, localzone='Australia/Melbourne'):
     """ covert input string time to local time
     eg. 
@@ -71,10 +94,18 @@ jsontofile(out)
 showtraintimes(out)
 
 # blob connection
+## write json file to azure blob
+ed = writefile_to_azblob(dstfile="traintime.json", conn_str=blobconnstr, container_name=blob_container_name, blob_name=blob_dstfile_name, overwrite=True)
+print(ed)
 
-blob = BlobClient.from_connection_string(conn_str=blobconnstr, container_name=blob_container_name, blob_name=blob_dstfile_name)
 
-with open("traintime.json", "rb") as data:
-    blob.upload_blob(data, overwrite=True)
 
+with open('jsontest.json') as jfp:
+    testjson = json.load(jfp)
+
+print(json.dumps(testjson, indent=2))
+
+## write string to azure blob 
+ed = writestring_to_azblob(json.dumps(testjson), conn_str=blobconnstr, container_name=blob_container_name, blob_name="test3.json", overwrite=True)
+print(ed)
 
